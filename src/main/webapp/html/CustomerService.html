@@ -41,9 +41,12 @@
     <div @mouseleave="postInfo">
         <el-row :gutter="20">
             <el-col :span="16">
+                <label>身份证号</label>
                 <el-input v-model="idcard" placeholder="身份证号"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>用户性质</label>
+                <br>
                 <el-select v-model="customerType" clearable placeholder="用户性质">
                     <el-option
                             v-for="option in customerTypeOptions"
@@ -57,24 +60,29 @@
         <br>
         <el-row :gutter="20">
             <el-col :span="8">
+                <label>单位名称</label>
                 <el-input v-model="companyName" placeholder="单位名称"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>联系方式</label>
                 <el-input v-model="phone" placeholder="联系方式"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>联系人</label>
                 <el-input v-model="customerName" placeholder="联系人"></el-input>
             </el-col>
         </el-row>
         <br>
         <el-row :gutter="20">
             <el-col :span="24">
+                <label>e-mail</label>
                 <el-input v-model="email" placeholder="e-mail"></el-input>
             </el-col>
         </el-row>
         <br>
         <el-row :gutter="20">
             <el-col :span="24">
+                <label>客户地址</label>
                 <el-input v-model="address" placeholder="客户地址"></el-input>
             </el-col>
         </el-row>
@@ -237,6 +245,7 @@
             <el-col :span="24">
                 <el-table
                     stripe
+                    v-loading="loading"
                     :data="customerData"
                     highlight-current-row
                     @row-click="handleCurrentChange"
@@ -297,7 +306,8 @@
                 idcard: '',
                 customerData: [],
                 customerDataCount: 0,
-                currentRow:{}
+                currentRow:{},
+                loading: true
             }
         },
         methods: {
@@ -308,6 +318,7 @@
                 //console.log(this.currentRow);
             },
             handleSearch: function () {
+                this.loading = true;
                 var param = new URLSearchParams();
                 param.append('idcard',this.idcard);
                 param.append('phone',this.phoneNumber);
@@ -320,9 +331,11 @@
                     that.customerData = data;
                     that.customerDataCount = +(JSON.parse(response.data).message);
                     console.log(data);
+                    that.loading = false;
                 });
             },
             handlePageChange: function (current){
+                this.loading = true;
                 var param = new URLSearchParams();
                 param.append('idcard',this.idcard);
                 param.append('phone',this.phoneNumber);
@@ -335,27 +348,26 @@
                     that.customerData = data;
                     that.customerDataCount = +(JSON.parse(response.data).message);
                     console.log(data);
+                    that.loading = false;
                 });
             }
         },
-        // mounted() {
-        //     var that = this;
-        //     axios.post("/Devices/getAllCustomer").then(function (response) {
-        //         var data = JSON.parse(response.data).data;
-        //         that.customerData = data;
-        //         console.log(data);
-        //     });
-        // }
+        created(){
+            this.handleSearch();
+        }
     }
 </script>
 
 <!-- 设备信息组件
+     接收数据：props['info']
      发送数据：post-device-info
 -->
 <template id="deviceInfo">
     <div @mouseleave="postInfo">
         <el-row :gutter="20">
             <el-col :span="6">
+                <label>设备类型</label>
+                <br>
                 <el-select v-model="deviceType" clearable placeholder="请选择设备类型">
                     <el-option
                             v-for="option in deviceTypeOptions"
@@ -366,12 +378,15 @@
                 </el-select>
             </el-col>
             <el-col :span="6">
+                <label>设备品牌</label>
                 <el-input v-model="deviceBrand" placeholder="设备品牌"></el-input>
             </el-col>
             <el-col :span="6">
+                <label>设备型号</label>
                 <el-input v-model="deviceModel" placeholder="设备型号"></el-input>
             </el-col>
             <el-col :span="6">
+                <label>设备系列号</label>
                 <el-input v-model="deviceSeries" placeholder="设备系列号"></el-input>
             </el-col>
         </el-row>
@@ -386,6 +401,8 @@
         -->
         <el-row :gutter="20">
             <el-col :span="6">
+                <label>故障类型</label>
+                <br>
                 <el-select v-model="faultType" clearable placeholder="故障类型">
                     <el-option
                             v-for="option in faultTypeOptions"
@@ -407,21 +424,26 @@
         -->
         <el-row :gutter="20">
             <el-col :span="8">
+                <label>HDD</label>
                 <el-input v-model="hdd" placeholder="HDD"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>内存</label>
                 <el-input v-model="ram" placeholder="内存"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>AC适配器</label>
                 <el-input v-model="ACadapter" placeholder="AC适配器"></el-input>
             </el-col>
         </el-row>
         <br>
         <el-row :gutter="20">
             <el-col :span="8">
+                <label>电池</label>
                 <el-input v-model="battery" placeholder="电池"></el-input>
             </el-col>
             <el-col :span="8">
+                <label>外接光驱</label>
                 <el-input v-model="CDROM" placeholder="外接光驱"></el-input>
             </el-col>
         </el-row>
@@ -430,8 +452,12 @@
 <script>
     var deviceInfo = {
         template: '#deviceInfo',
+        props: [
+            'info'
+        ],
         data: function (){
             return {
+                deviceId: '',
                 deviceType: '',
                 deviceTypeOptions: [{
                     label: '台式机',
@@ -472,6 +498,7 @@
         methods: {
             postInfo: function (){
                 var info = {
+                    deviceId: this.deviceId,
                     deviceType: this.deviceType,
                     deviceBrand: this.deviceBrand,
                     deviceModel: this.deviceModel,
@@ -487,26 +514,43 @@
                 };
                 this.$emit('post-device-info',info);
             }
+        },
+        watch: {
+            info: function (){
+                this.deviceId = this.info.deviceId;
+                this.deviceType = this.info.deviceType;
+                this.deviceBrand = this.info.deviceBrand;
+                this.deviceModel = this.info.deviceModel;
+                this.deviceSeries = this.info.deviceSeries;
+                this.faultType = this.info.faultType;
+                this.hdd = this.info.hdd;
+                this.ram = this.info.ram;
+                this.ACadapter = this.info.ACadapter;
+                this.battery = this.info.battery;
+                this.CDROM = this.info.CDROM;
+            }
         }
     }
 </script>
 
 <!-- 报修信息组件
+     接收数据：props['info']
      发送数据：post-report-info
 -->
 <template id="reportInfo">
     <div @mouseleave="postInfo">
         <el-row :gutter="20">
             <el-col :span="8">
+                <label>报修时间</label>
                 <el-input v-model="reportTime" placeholder="报修时间"></el-input>
             </el-col>
             <el-col :span="8">
-                <el-input v-model="estimateCost" placeholder="预估费用"></el-input>
+                <label>预估完成时间</label>
+                <el-input v-model="estimateCompleteTime" placeholder="预估完成时间"></el-input>
             </el-col>
-        </el-row>
-        <br>
-        <el-row :gutter="20">
             <el-col :span="8">
+                <label>报修状态</label>
+                <br>
                 <el-select v-model="reportStatus" clearable placeholder="报修状态">
                     <el-option
                             v-for="option in reportStatusOptions"
@@ -516,42 +560,52 @@
                     </el-option>
                 </el-select>
             </el-col>
-            <el-col :span="8">
-                <el-input v-model="estimateCompleteTime" placeholder="预估完成时间"></el-input>
-            </el-col>
         </el-row>
     </div>
 </template>
 <script>
     var reportInfo = {
         template: '#reportInfo',
+        props: [
+            'info'
+        ],
         data: function (){
             return {
+                reportId: '',
                 reportTime: '',
-                estimateCost: '',
+                //estimateCost: '',
                 estimateCompleteTime: '',
                 reportStatus: '',
                 reportStatusOptions: [{
                     label: '进行中',
-                    value: '进行中'
+                    value: '1'
                 },{
                     label: '结束',
-                    value: '结束'
+                    value: '2'
                 },{
                     label: '撤销',
-                    value: '撤销'
+                    value: '3'
                 }]
             }
         },
         methods: {
             postInfo: function (){
                 var info = {
+                    reportId: this.reportId,
                     reportTime: this.reportTime,
-                    estimateCost: this.estimateCost,
+                    //estimateCost: this.estimateCost,
                     estimateCompleteTime: this.estimateCompleteTime,
                     reportStatus: this.reportStatus
                 };
                 this.$emit('post-report-info',info);
+            }
+        },
+        watch: {
+            info :function (){
+                this.reportId = this.info.reportId;
+                this.reportTime = this.info.reportTime;
+                this.estimateCompleteTime = this.info.estimateCompleteTime;
+                this.reportStatus = this.reportStatusOptions[this.info.reportStatus-1].value;
             }
         }
     }
@@ -573,13 +627,14 @@
                 <el-input v-model="reportTime" placeholder="报修时间"></el-input>
             </el-col>
             <el-col :span="4">
-                <el-button type="primary" icon="el-icon-search">搜索</el-button>
+                <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
             </el-col>
         </el-row>
         <el-row>
             <el-col :span="24">
                 <el-table
                         stripe
+                        v-loading="loading"
                         :data="reportData"
                         highlight-current-row
                         @row-click="handleCurrentChange"
@@ -602,7 +657,7 @@
                     ></el-table-column>
                     <el-table-column
                             label="品牌"
-                            prop="brand"
+                            prop="deviceBrand"
                     ></el-table-column>
                 </el-table>
             </el-col>
@@ -614,16 +669,75 @@
         template: '#reportInfoFilter',
         data: function (){
             return {
+                loading: true,
                 customerName: '',
                 phone: '',
                 reportTime: '',
                 reportData: [],
+                reportDataCount: 0,
             }
         },
         methods: {
             handleCurrentChange :function (currentRow) {
                 this.$emit('post-row',currentRow);
+            },
+            handleSearch: function (){
+                this.loading = true;
+                var param = new URLSearchParams();
+                param.append('customerName',this.customerName);
+                param.append('phone',this.phone);
+                param.append('repairTime',this.reportTime);
+                param.append('currentPage',1);
+                var that = this;
+                axios.post('../getMaintenanceReport',param).then(function (response){
+                    var data = JSON.parse(response.data).data;
+                    that.reportData.length = 0;
+                    for(var i = 0; i < data.length; i++){
+                        var report = {
+                            customerName: data[i].customer.customerName,
+                            phone: data[i].customer.phone,
+                            repairTime: new Date(data[i].repairTime).toLocaleDateString(),
+                            deviceType: data[i].device.type,
+                            deviceBrand: data[i].device.brand,
+                            customerInfo: {
+                                customerId: data[i].customer.id,
+                                customerName: data[i].customer.customerName,
+                                phone: data[i].customer.phone,
+                                idcard: data[i].customer.idcard,
+                                customerType: data[i].customer.customerType,
+                                companyName: data[i].customer.companyName,
+                                email: data[i].customer.email,
+                                address: data[i].customer.address,
+                            },
+                            deviceInfo: {
+                                deviceId: data[i].device.id,
+                                deviceType: data[i].device.type,
+                                deviceBrand: data[i].device.brand,
+                                deviceModel: data[i].device.model,
+                                deviceSeries: data[i].device.seriesNum,
+                                faultType: data[i].device.faultType,
+                                hdd: data[i].device.hdd,
+                                ram: data[i].device.memery,
+                                ACadapter: data[i].device.acAdapter,
+                                battery: data[i].device.battery,
+                                CDROM: data[i].device.opticalDrive
+                            },
+                            reportInfo: {
+                                reportId: data[i].id,
+                                reportTime: new Date(data[i].repairTime).toLocaleDateString(),
+                                estimateCompleteTime: new Date(data[i].expectedTime).toLocaleDateString(),
+                                reportStatus: data[i].status,
+                            }
+                        }
+                        that.reportData.push(report);
+                    }
+                    that.reportDataCount = +(JSON.parse(response.data).message);
+                    that.loading = false;
+                });
             }
+        },
+        created() {
+            this.handleSearch();
         }
     }
 </script>
@@ -759,32 +873,35 @@
         <el-row>
             <el-col :span="20">
                 <div :style="style.container">
-                    <report-info-filter></report-info-filter>
+                    <report-info-filter @post-row="handleRow"></report-info-filter>
                 </div>
-                <div :style="style.container">
+                <div :style="style.container" v-show="visible.editor.value">
                     <el-row :gutter="20">
-                        <el-col :span="16">
+                        <el-col :span="18">
                             <h3>编辑</h3>
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="primary" plain size="small">保存更改</el-button>
+                            <el-button type="primary" plain size="small" @click="handleUpdate">保存更改</el-button>
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="primary" plain size="small">撤销报修</el-button>
+                            <el-button type="primary" plain size="small" @click="handlePrint">打印确认单</el-button>
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="primary" plain size="small">打印确认单</el-button>
-                        </el-col>
-                        <el-col :span="2">
-                            <el-button type="primary" plain size="small">确认报修</el-button>
+                            <el-button type="primary" plain size="small" @click="handleConfirm">确认报修</el-button>
                         </el-col>
                     </el-row>
                     <h4>客户信息</h4>
-                    <customer-info-readonly></customer-info-readonly>
+                    <customer-info-readonly :info="customerInfoData"></customer-info-readonly>
                     <h4>设备信息</h4>
-                    <device-info></device-info>
+                    <device-info
+                            :info="deviceInfoData"
+                            @post-device-info="handleDeviceInfo"
+                    ></device-info>
                     <h4>报修信息</h4>
-                    <report-info></report-info>
+                    <report-info
+                            :info="reportInfoData"
+                            @post-report-info="handleReportInfo"
+                    ></report-info>
                 </div>
             </el-col>
         </el-row>
@@ -807,10 +924,61 @@
                         padding: '20px',
                         boxShadow: '0 2px 12px 0 rgba(0, 0, 0, 0.1)'
                     }
-                }
+                },
+                visible:{
+                    editor:{value: false}
+                },
+                customerInfoData: {},
+                deviceInfoData: {},
+                reportInfoData: {}
             }
         },
         methods: {
+            handleRow: function (row){
+                this.customerInfoData = row.customerInfo;
+                this.deviceInfoData = row.deviceInfo;
+                this.reportInfoData = row.reportInfo;
+                this.visible.editor.value = true;
+            },
+            handleDeviceInfo: function (info){
+                this.deviceInfoData = info;
+            },
+            handleReportInfo: function (info){
+                this.reportInfoData = info;
+                console.log(info);
+            },
+            handleUpdate: function (){
+                var param  = new URLSearchParams();
+                param.append('repairRecordId',this.reportInfoData.reportId);
+                param.append('reportTime',this.reportInfoData.reportTime);
+                param.append('estimateCompleteTime',this.reportInfoData.estimateCompleteTime);
+                param.append('reportStatus',this.reportInfoData.reportStatus);
+                param.append('deviceId',this.deviceInfoData.deviceId);
+                param.append('deviceType',this.deviceInfoData.deviceType);
+                param.append('deviceModel',this.deviceInfoData.deviceModel);
+                param.append('deviceSeries',this.deviceInfoData.deviceSeries);
+                param.append('faultType',this.deviceInfoData.faultType);
+                param.append('hdd',this.deviceInfoData.hdd);
+                param.append('ram',this.deviceInfoData.ram);
+                param.append('ACadapter',this.deviceInfoData.ACadapter);
+                param.append('battery',this.deviceInfoData.battery);
+                param.append('CDROM',this.deviceInfoData.CDROM);
+                axios.post('../editMaintenanceReport',param).then(function (response){
+
+                })
+                this.visible.editor.value = false;
+            },
+            handlePrint: function (){
+
+            },
+            handleConfirm: function (){
+                var param = new URLSearchParams();
+                param.append('repairRecordId',this.reportInfoData.reportId);
+                axios.post('../postConfirmationForm',param).then(function (response){
+
+                });
+                this.visible.editor.value = false;
+            }
 
         },
 
